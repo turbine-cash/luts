@@ -18,7 +18,7 @@ pub struct CloseAddressLookupTable<'info> {
         mut,
         has_one = address_lookup_table,
         has_one = signer,
-        seeds = [UserAddressLookupTable::SEED.as_bytes(), signer.key().as_ref()],
+        seeds = [UserAddressLookupTable::SEED.as_bytes(), signer.key().as_ref(), user_address_lookup_table.id.to_le_bytes().as_ref()],
         bump = user_address_lookup_table.bump,
         close = signer
     )]

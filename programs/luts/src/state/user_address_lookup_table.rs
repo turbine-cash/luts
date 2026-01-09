@@ -6,6 +6,7 @@ pub struct UserAddressLookupTable {
     pub bump: u8,
     pub signer: Pubkey,
     pub id: u64,
+    pub size: u64,
     pub address_lookup_table: Pubkey,
     pub accounts: Vec<Pubkey>,
     pub last_updated_slot: u64,
@@ -21,6 +22,7 @@ impl UserAddressLookupTable {
         + size_of::<u8>() // bump
         + size_of::<Pubkey>() // signer
         + size_of::<u64>() // signer
+        + size_of::<u64>() // size
         + size_of::<Pubkey>() // address_lookup_table
         + 4 + (Self::MAX_ADDRESSES * size_of::<Pubkey>()) // accounts vec (length prefix + data)
         + size_of::<u64>() // last_updated_slot

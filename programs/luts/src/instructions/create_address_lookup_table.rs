@@ -44,10 +44,10 @@ pub fn create_address_lookup_table(
     user_address_lookup_table.signer = signer.key();
     user_address_lookup_table.address_lookup_table = address_lookup_table.key();
     user_address_lookup_table.accounts = Vec::new();
+    user_address_lookup_table.size = 0;
     let clock = Clock::get()?;
     user_address_lookup_table.last_updated_slot = clock.slot;
     user_address_lookup_table.last_updated_timestamp = clock.unix_timestamp;
-
     let (ix, address) = create_lookup_table(
         user_address_lookup_table.key(),
         signer.key(),
@@ -68,13 +68,11 @@ pub fn create_address_lookup_table(
             ctx.accounts.address_lookup_table_program.to_account_info(),
         ],
     )?;
-
     emit!(LutCreated {
         wrapper: user_address_lookup_table.key(),
         lut_address: address_lookup_table.key(),
         authority: signer.key(),
         slot: clock.slot,
     });
-
     Ok(())
 }

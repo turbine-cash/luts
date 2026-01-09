@@ -7,6 +7,7 @@ mod tests {
     fn test_user_address_lookup_table_is_ready() {
         let wrapper = UserAddressLookupTable {
             bump: 255,
+            size: 0,
             id: 1,
             signer: Pubkey::new_unique(),
             address_lookup_table: Pubkey::new_unique(),
@@ -25,6 +26,7 @@ mod tests {
     fn test_user_address_lookup_table_slots_until_ready() {
         let wrapper = UserAddressLookupTable {
             bump: 255,
+            size: 0,
             id: 1,
             signer: Pubkey::new_unique(),
             address_lookup_table: Pubkey::new_unique(),
@@ -47,6 +49,7 @@ mod tests {
 
         let wrapper = UserAddressLookupTable {
             bump: 255,
+            size: 0,
             id: 1,
             signer: Pubkey::new_unique(),
             address_lookup_table: Pubkey::new_unique(),
@@ -65,6 +68,7 @@ mod tests {
         let wrapper = UserAddressLookupTable {
             bump: 255,
             id: 1,
+            size: 0,
             signer: Pubkey::new_unique(),
             address_lookup_table: Pubkey::new_unique(),
             accounts: vec![
@@ -84,6 +88,7 @@ mod tests {
         let wrapper = UserAddressLookupTable {
             bump: 255,
             id: 1,
+            size: 0,
             signer: Pubkey::new_unique(),
             address_lookup_table: Pubkey::new_unique(),
             accounts: vec![Pubkey::new_unique(); 10],

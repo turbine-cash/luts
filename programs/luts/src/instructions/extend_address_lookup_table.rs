@@ -19,7 +19,7 @@ pub struct ExtendAddressLookupTable<'info> {
         mut,
         has_one = address_lookup_table,
         has_one = signer,
-        seeds = [UserAddressLookupTable::SEED.as_bytes(), signer.key().as_ref()],
+        seeds = [UserAddressLookupTable::SEED.as_bytes(), signer.key().as_ref(), user_address_lookup_table.id.to_le_bytes().as_ref()],
         bump = user_address_lookup_table.bump
     )]
     pub user_address_lookup_table: Box<Account<'info, UserAddressLookupTable>>,
@@ -31,18 +31,16 @@ pub fn extend_address_lookup_table(ctx: Context<ExtendAddressLookupTable>) -> Re
     let user_address_lookup_table = &mut ctx.accounts.user_address_lookup_table;
     let address_lookup_table = &ctx.accounts.address_lookup_table;
     let system_program = &ctx.accounts.system_program;
-
     let new_addresses: Vec<Pubkey> = ctx
         .remaining_accounts
         .iter()
         .map(|acc| *acc.key)
         .filter(|addr| !user_address_lookup_table.accounts.contains(addr))
         .collect();
-
     if new_addresses.is_empty() {
         return Ok(());
     }
-
+    user_address_lookup_table.size += new_addresses.len() as u64;
     let total_after = user_address_lookup_table
         .accounts
         .len()
@@ -51,7 +49,6 @@ pub fn extend_address_lookup_table(ctx: Context<ExtendAddressLookupTable>) -> Re
         total_after <= UserAddressLookupTable::MAX_ADDRESSES,
         LutError::MaxAddressesExceeded
     );
-
     let clock = Clock::get()?;
     user_address_lookup_table.last_updated_slot = clock.slot;
     user_address_lookup_table.last_updated_timestamp = clock.unix_timestamp;
@@ -74,7 +71,7 @@ pub fn extend_address_lookup_table(ctx: Context<ExtendAddressLookupTable>) -> Re
         &[user_address_lookup_table.bump],
     ];
 
-    solana_program::program::invoke_signed(
+    program::invoke_signed(
         &ix,
         &[
             signer.to_account_info(),
