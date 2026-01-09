@@ -46,7 +46,6 @@ pub fn create_address_lookup_table(
     user_address_lookup_table.size = 0;
     let clock = Clock::get()?;
     user_address_lookup_table.last_updated_slot = clock.slot;
-    user_address_lookup_table.last_updated_timestamp = clock.unix_timestamp;
     let (ix, address) = create_lookup_table(
         user_address_lookup_table.key(),
         signer.key(),

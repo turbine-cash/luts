@@ -32,6 +32,11 @@ pub fn extend_address_lookup_table(ctx: Context<ExtendAddressLookupTable>) -> Re
     let user_address_lookup_table = &mut ctx.accounts.user_address_lookup_table;
     let address_lookup_table = &ctx.accounts.address_lookup_table;
     let system_program = &ctx.accounts.system_program;
+    let clock = Clock::get()?;
+    require!(
+        user_address_lookup_table.is_ready(clock.slot),
+        LutError::LutNotReady
+    );
     let lut_data = address_lookup_table.try_borrow_data()?;
     let lut =
         AddressLookupTable::deserialize(&lut_data).map_err(|_| LutError::InvalidLookupTable)?;
@@ -42,9 +47,7 @@ pub fn extend_address_lookup_table(ctx: Context<ExtendAddressLookupTable>) -> Re
         .map(|acc| *acc.key)
         .filter(|addr| !existing_addresses.contains(addr))
         .collect();
-    if new_addresses.is_empty() {
-        return Ok(());
-    }
+    require!(!new_addresses.is_empty(), LutError::NoNewAddresses);
     user_address_lookup_table.size += new_addresses.len() as u64;
     let total_after = existing_addresses.len().saturating_add(new_addresses.len());
     require!(
@@ -52,9 +55,7 @@ pub fn extend_address_lookup_table(ctx: Context<ExtendAddressLookupTable>) -> Re
         LutError::MaxAddressesExceeded
     );
     drop(lut_data);
-    let clock = Clock::get()?;
     user_address_lookup_table.last_updated_slot = clock.slot;
-    user_address_lookup_table.last_updated_timestamp = clock.unix_timestamp;
     let ix = extend_lookup_table(
         address_lookup_table.key(),
         user_address_lookup_table.key(),
@@ -74,14 +75,11 @@ pub fn extend_address_lookup_table(ctx: Context<ExtendAddressLookupTable>) -> Re
         ],
         signer_seeds,
     )?;
-    let is_ready = user_address_lookup_table.is_ready(clock.slot);
-    let slots_until_ready = user_address_lookup_table.slots_until_ready(clock.slot);
+
     emit!(LutExtended {
         wrapper: user_address_lookup_table.key(),
         addresses_added: new_addresses.len() as u32,
         total_addresses: total_after as u32,
-        is_ready,
-        slots_until_ready,
     });
     Ok(())
 }
